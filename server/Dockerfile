@@ -1,15 +1,16 @@
 FROM node:18
 
-WORKDIR /app
+# Create app directory
+WORKDIR /app/server
 
-# Copy package files
-COPY package*.json ./
+# Copy package files from server directory
+COPY server/package*.json ./
 
 # Install dependencies
 RUN npm install
 
-# Copy the rest of the application
-COPY . .
+# Copy the server directory contents
+COPY server/ .
 
 # Expose the port your app runs on
 EXPOSE 3001
