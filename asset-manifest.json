@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/movierecchatbot/static/css/main.4c2a76dc.css",
-    "main.js": "/movierecchatbot/static/js/main.4d880a77.js",
+    "main.js": "/movierecchatbot/static/js/main.ce46798d.js",
     "index.html": "/movierecchatbot/index.html",
     "main.4c2a76dc.css.map": "/movierecchatbot/static/css/main.4c2a76dc.css.map",
-    "main.4d880a77.js.map": "/movierecchatbot/static/js/main.4d880a77.js.map"
+    "main.ce46798d.js.map": "/movierecchatbot/static/js/main.ce46798d.js.map"
   },
   "entrypoints": [
     "static/css/main.4c2a76dc.css",
-    "static/js/main.4d880a77.js"
+    "static/js/main.ce46798d.js"
   ]
 }
