@@ -1,6 +1,6 @@
 const config = {
   apiUrl: process.env.NODE_ENV === 'production'
-    ? 'https://movierecchatbot-backend.onrender.com'
+    ? 'https://movierecchatbot-production.up.railway.app'
     : 'http://localhost:3001'
 };
 
