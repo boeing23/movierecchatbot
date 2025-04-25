@@ -1,4 +1,4 @@
-FROM node:18
+FROM node:18-slim
 
 # Create and set working directory
 WORKDIR /app
@@ -7,7 +7,7 @@ WORKDIR /app
 COPY server/package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm install --production
 
 # Copy the rest of the application
 COPY server/ ./
@@ -15,9 +15,9 @@ COPY server/ ./
 # Expose the port your app runs on
 EXPOSE 3001
 
-# Create a shell script to run the application
-RUN echo '#!/bin/sh\nnode server.js' > start.sh && \
-    chmod +x start.sh
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=3001
 
 # Set the start command explicitly
-ENTRYPOINT ["/app/start.sh"] 
+CMD ["node", "server.js"] 

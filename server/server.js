@@ -22,6 +22,11 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Server is running' });
 });
 
+// Add health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'healthy' });
+});
+
 // Initial system prompt for the movie recommendation agent
 const SYSTEM_PROMPT = `You are MovieGenius, an AI movie recommendation agent. 
 Ask the user questions about their preferences like:
