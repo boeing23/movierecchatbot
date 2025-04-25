@@ -1,0 +1,133 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  max-width: 1000px;
+  margin: 0 auto;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.15);
+  background-color: #111;
+  color: #fff;
+  font-family: 'Roboto', sans-serif;
+}
+
+.header {
+  background: linear-gradient(135deg, #000000, #333333);
+  color: white;
+  padding: 25px;
+  text-align: center;
+  border-bottom: 1px solid #444;
+}
+
+.header h1 {
+  margin-bottom: 8px;
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.header p {
+  color: #aaa;
+  font-size: 1.1rem;
+}
+
+.chat-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  overflow: hidden;
+  background-color: #111;
+}
+
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 20px;
+  padding-right: 10px;
+}
+
+.messages::-webkit-scrollbar {
+  width: 8px;
+}
+
+.messages::-webkit-scrollbar-track {
+  background: #222;
+  border-radius: 4px;
+}
+
+.messages::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 4px;
+}
+
+.input-form {
+  display: flex;
+  gap: 12px;
+  padding: 15px;
+  border-top: 1px solid #333;
+  background-color: #1a1a1a;
+  border-radius: 8px;
+}
+
+.input-form input {
+  flex: 1;
+  padding: 15px 20px;
+  border: 1px solid #333;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: #222;
+  color: #fff;
+  transition: all 0.3s ease;
+}
+
+.input-form input:focus {
+  outline: none;
+  border-color: #666;
+  background-color: #2a2a2a;
+}
+
+.input-form button {
+  padding: 0 25px;
+  background-color: #fff;
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.input-form button:hover {
+  background-color: #ddd;
+  transform: translateY(-1px);
+}
+
+.input-form button:disabled {
+  background-color: #333;
+  color: #666;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.reset-button {
+  background-color: transparent !important;
+  color: #fff !important;
+  border: 1px solid #444 !important;
+}
+
+.reset-button:hover {
+  background-color: #222 !important;
+  border-color: #666 !important;
+}
+
+.footer {
+  text-align: center;
+  padding: 15px;
+  background-color: #000;
+  color: #666;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+} 

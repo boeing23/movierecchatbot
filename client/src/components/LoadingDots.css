@@ -1,0 +1,44 @@
+.loading-container {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  font-size: 16px;
+  color: #aaa;
+}
+
+.loading-text {
+  font-weight: 500;
+  letter-spacing: 1px;
+}
+
+.loading-dot {
+  font-size: 20px;
+  color: #fff;
+  opacity: 0;
+  animation: dotFade 1.5s infinite;
+  margin-left: 3px;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.loading-dot:nth-child(2) {
+  animation-delay: 0.5s;
+}
+
+.loading-dot:nth-child(3) {
+  animation-delay: 1s;
+}
+
+.loading-dot:nth-child(4) {
+  animation-delay: 1.5s;
+}
+
+@keyframes dotFade {
+  0%, 100% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+} 
