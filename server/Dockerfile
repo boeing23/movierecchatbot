@@ -15,5 +15,6 @@ COPY server/ .
 # Expose the port your app runs on
 EXPOSE 3001
 
-# Command to run the application
-CMD ["node", "server.js"] 
+# Set the start command explicitly
+ENTRYPOINT ["node"]
+CMD ["server.js"] 
