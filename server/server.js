@@ -31,8 +31,8 @@ const QWEN_API_KEY = process.env.QWEN_API_KEY;
 const QWEN_API_URL = 'https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation';
 
 // Validate API key on startup
-if (!QWEN_API_KEY || !QWEN_API_KEY.startsWith('sk-or-v1-')) {
-  console.error('Invalid or missing Qwen API key. The key should start with "sk-or-v1-"');
+if (!QWEN_API_KEY) {
+  console.error('Missing Qwen API key. Please add QWEN_API_KEY to your environment variables.');
 }
 
 console.log('Starting server with API key:', QWEN_API_KEY ? `${QWEN_API_KEY.substring(0, 10)}...` : 'API key is missing');
@@ -99,9 +99,9 @@ app.post('/api/chat', async (req, res) => {
     }
     
     // Validate API key before making the request
-    if (!QWEN_API_KEY || !QWEN_API_KEY.startsWith('sk-or-v1-')) {
-      console.error('Invalid or missing Qwen API key');
-      throw new Error('Invalid or missing API key configuration');
+    if (!QWEN_API_KEY) {
+      console.error('Missing Qwen API key');
+      throw new Error('Missing API key configuration');
     }
     
     // Initialize conversation if it doesn't exist
@@ -129,13 +129,14 @@ app.post('/api/chat', async (req, res) => {
           },
           parameters: {
             temperature: 0.7,
-            max_tokens: 800
+            max_tokens: 800,
+            result_format: "message"
           }
         },
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': QWEN_API_KEY
+            'Authorization': `Bearer ${QWEN_API_KEY}`
           }
         }
       );
