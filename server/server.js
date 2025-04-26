@@ -37,6 +37,121 @@ if (!QWEN_API_KEY) {
 
 console.log('Starting server with API key:', QWEN_API_KEY ? `${QWEN_API_KEY.substring(0, 10)}...` : 'API key is missing');
 
+// Add detailed debug endpoint
+app.get('/api/debug', async (req, res) => {
+  try {
+    console.log('=== DEBUG API KEY INFO ===');
+    console.log('API Key exists:', !!QWEN_API_KEY);
+    console.log('API Key length:', QWEN_API_KEY ? QWEN_API_KEY.length : 0);
+    console.log('API Key prefix:', QWEN_API_KEY ? QWEN_API_KEY.substring(0, 5) : 'N/A');
+    console.log('API Key format valid:', QWEN_API_KEY && QWEN_API_KEY.startsWith('sk-'));
+    
+    const authHeader = `Bearer ${QWEN_API_KEY}`;
+    console.log('Auth header:', authHeader.substring(0, 20) + '...');
+    
+    // Debug payload
+    const payload = {
+      model: 'qwen-max',
+      input: {
+        messages: [
+          { role: 'system', content: 'You are a helpful assistant.' },
+          { role: 'user', content: 'Hello' }
+        ]
+      },
+      parameters: {
+        temperature: 0.7,
+        max_tokens: 10,
+        result_format: "message"
+      }
+    };
+    
+    console.log('Request payload:', JSON.stringify(payload, null, 2));
+    console.log('API URL:', QWEN_API_URL);
+    
+    console.log('Sending test request to Qwen API...');
+    
+    try {
+      const response = await axios.post(
+        QWEN_API_URL,
+        payload,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': authHeader
+          }
+        }
+      );
+      
+      console.log('=== DEBUG API RESPONSE ===');
+      console.log('Status:', response.status);
+      console.log('Headers:', JSON.stringify(response.headers, null, 2));
+      console.log('Data:', JSON.stringify(response.data, null, 2));
+      
+      res.json({
+        status: 'success',
+        api_key_info: {
+          exists: !!QWEN_API_KEY,
+          length: QWEN_API_KEY ? QWEN_API_KEY.length : 0,
+          prefix: QWEN_API_KEY ? QWEN_API_KEY.substring(0, 5) : 'N/A',
+          valid_format: QWEN_API_KEY && QWEN_API_KEY.startsWith('sk-')
+        },
+        request: {
+          url: QWEN_API_URL,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + (QWEN_API_KEY ? QWEN_API_KEY.substring(0, 5) + '...' : 'N/A')
+          },
+          payload: payload
+        },
+        response: {
+          status: response.status,
+          headers: response.headers,
+          data: response.data
+        }
+      });
+    } catch (apiError) {
+      console.error('=== DEBUG API ERROR ===');
+      console.error('Message:', apiError.message);
+      console.error('Status:', apiError.response?.status);
+      console.error('Status Text:', apiError.response?.statusText);
+      console.error('Data:', JSON.stringify(apiError.response?.data, null, 2));
+      console.error('Headers:', JSON.stringify(apiError.response?.headers, null, 2));
+      
+      res.status(500).json({
+        status: 'error',
+        api_key_info: {
+          exists: !!QWEN_API_KEY,
+          length: QWEN_API_KEY ? QWEN_API_KEY.length : 0,
+          prefix: QWEN_API_KEY ? QWEN_API_KEY.substring(0, 5) : 'N/A',
+          valid_format: QWEN_API_KEY && QWEN_API_KEY.startsWith('sk-')
+        },
+        request: {
+          url: QWEN_API_URL,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + (QWEN_API_KEY ? QWEN_API_KEY.substring(0, 5) + '...' : 'N/A')
+          },
+          payload: payload
+        },
+        error: {
+          message: apiError.message,
+          status: apiError.response?.status,
+          statusText: apiError.response?.statusText,
+          data: apiError.response?.data,
+          headers: apiError.response?.headers
+        }
+      });
+    }
+  } catch (error) {
+    console.error('General error in debug endpoint:', error);
+    res.status(500).json({
+      status: 'error',
+      error: error.message,
+      stack: error.stack
+    });
+  }
+});
+
 // Add route for API key test endpoint
 app.get('/api/test', async (req, res) => {
   try {
