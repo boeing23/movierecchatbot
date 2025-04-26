@@ -37,6 +37,72 @@ if (!QWEN_API_KEY) {
 
 console.log('Starting server with API key:', QWEN_API_KEY ? `${QWEN_API_KEY.substring(0, 10)}...` : 'API key is missing');
 
+// Add route for API key test endpoint
+app.get('/api/test', async (req, res) => {
+  try {
+    // Log full API key for debugging (BE CAREFUL TO REMOVE THIS IN PRODUCTION)
+    console.log('Debug - Full API key:', QWEN_API_KEY);
+    
+    const authHeader = `Bearer ${QWEN_API_KEY}`;
+    console.log('Debug - Auth header:', authHeader);
+    
+    // Make a simple API test call
+    const testResponse = await axios.post(
+      QWEN_API_URL,
+      {
+        model: 'qwen-max',
+        input: {
+          messages: [
+            { role: 'system', content: 'You are a helpful assistant.' },
+            { role: 'user', content: 'Hello' }
+          ]
+        },
+        parameters: {
+          temperature: 0.7,
+          max_tokens: 10,
+          result_format: "message"
+        }
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': authHeader
+        }
+      }
+    );
+    
+    res.json({ 
+      status: 'success', 
+      message: 'API connection successful',
+      response: testResponse.data
+    });
+  } catch (error) {
+    console.error('API Test Error:', {
+      message: error.message,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      headers: error.response?.headers,
+      config: {
+        url: error.config?.url,
+        method: error.config?.method,
+        headers: {
+          'Content-Type': error.config?.headers?.['Content-Type'],
+          'Authorization': error.config?.headers?.['Authorization'] ? 
+            `Bearer ${error.config?.headers?.['Authorization'].substring(7, 15)}...` : 'missing'
+        }
+      }
+    });
+    
+    res.status(500).json({
+      status: 'error',
+      error: error.message,
+      details: error.response?.data || 'No response data',
+      statusCode: error.response?.status || 'No status code'
+    });
+  }
+});
+
 // Add route for a simple health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Server is running' });
