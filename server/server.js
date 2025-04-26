@@ -73,7 +73,8 @@ app.get('/api/debug', async (req, res) => {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${QWEN_API_KEY}`,
-            'HTTP-Referer': 'https://boeing23.github.io/movierecchatbot'
+            'HTTP-Referer': 'https://boeing23.github.io/movierecchatbot',
+            'X-Title': 'MovieGenius'
           }
         }
       );
@@ -96,7 +97,8 @@ app.get('/api/debug', async (req, res) => {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${QWEN_API_KEY}`,
-            'HTTP-Referer': 'https://boeing23.github.io/movierecchatbot'
+            'HTTP-Referer': 'https://boeing23.github.io/movierecchatbot',
+            'X-Title': 'MovieGenius'
           },
           payload: payload
         },
@@ -127,7 +129,8 @@ app.get('/api/debug', async (req, res) => {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${QWEN_API_KEY}`,
-            'HTTP-Referer': 'https://boeing23.github.io/movierecchatbot'
+            'HTTP-Referer': 'https://boeing23.github.io/movierecchatbot',
+            'X-Title': 'MovieGenius'
           },
           payload: payload
         },
@@ -175,7 +178,8 @@ app.get('/api/test', async (req, res) => {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${QWEN_API_KEY}`,
-          'HTTP-Referer': 'https://boeing23.github.io/movierecchatbot'
+          'HTTP-Referer': 'https://boeing23.github.io/movierecchatbot',
+          'X-Title': 'MovieGenius'
         }
       }
     );
@@ -307,7 +311,8 @@ app.post('/api/chat', async (req, res) => {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${QWEN_API_KEY}`,
-            'HTTP-Referer': 'https://boeing23.github.io/movierecchatbot'
+            'HTTP-Referer': 'https://boeing23.github.io/movierecchatbot',
+            'X-Title': 'MovieGenius'
           }
         }
       );
