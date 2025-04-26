@@ -269,17 +269,17 @@ function formatAssistantResponse(content) {
   // First, trim any extra whitespace
   let formatted = content.trim();
 
-  // Replace numbered movie suggestions with emoji
-  formatted = formatted.replace(/(\d+\.\s+\*\*)/g, '🎬 **');
+  // Replace numbered movie suggestions with emoji and add line break
+  formatted = formatted.replace(/(\d+\.\s+\*\*)/g, '\n🎬 **');
 
-  // Add emoji to common sections
+  // Add emoji to common sections and ensure proper line breaks
   const emojiReplacements = [
-    { pattern: /Director:/g, replacement: '🎥 Director:' },
-    { pattern: /Cast:/g, replacement: '👥 Cast:' },
-    { pattern: /Why you'll enjoy it:/g, replacement: '✨ Why you\'ll enjoy it:' },
-    { pattern: /Would you like/g, replacement: '🤔 Would you like' },
-    { pattern: /Do you have any/g, replacement: '💭 Do you have any' },
-    { pattern: /Based on your/g, replacement: '🎯 Based on your' }
+    { pattern: /Director:/g, replacement: '\n🎥 Director:' },
+    { pattern: /Cast:/g, replacement: '\n👥 Cast:' },
+    { pattern: /Why you'll enjoy it:/g, replacement: '\n✨ Why you\'ll enjoy it:' },
+    { pattern: /Would you like/g, replacement: '\n\n🤔 Would you like' },
+    { pattern: /Do you have any/g, replacement: '\n\n💭 Do you have any' },
+    { pattern: /Based on your/g, replacement: '\n\n🎯 Based on your' }
   ];
 
   // Apply all emoji replacements
@@ -292,12 +292,27 @@ function formatAssistantResponse(content) {
     .split('\n')
     .filter(line => line.trim() !== '')
     .map(line => line.trim())
+    // Add double line breaks between movies and sections
     .join('\n\n');
+
+  // Add extra line break before each movie
+  formatted = formatted.replace(/🎬 \*\*/g, '\n\n🎬 **');
+
+  // Add line break after movie title
+  formatted = formatted.replace(/\*\*\) -/g, '**\n');
+
+  // Add line break after each movie detail
+  formatted = formatted.replace(/(\n[🎥👥✨].+?)(?=\n|$)/g, '$1\n');
 
   // Add a friendly emoji at the start if it's a greeting
   if (formatted.toLowerCase().includes('hello') || formatted.toLowerCase().includes('hi')) {
     formatted = '👋 ' + formatted;
   }
+
+  // Clean up any multiple consecutive line breaks
+  formatted = formatted
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
 
   return formatted;
 }
