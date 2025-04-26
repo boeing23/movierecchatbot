@@ -30,7 +30,12 @@ const QWEN_API_KEY = process.env.QWEN_API_KEY;
 // Correct API URL for Qwen via Alibaba Cloud DashScope
 const QWEN_API_URL = 'https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation';
 
-console.log('Starting server with API key:', QWEN_API_KEY ? 'API key is set' : 'API key is missing');
+// Validate API key on startup
+if (!QWEN_API_KEY || !QWEN_API_KEY.startsWith('sk-or-v1-')) {
+  console.error('Invalid or missing Qwen API key. The key should start with "sk-or-v1-"');
+}
+
+console.log('Starting server with API key:', QWEN_API_KEY ? `${QWEN_API_KEY.substring(0, 10)}...` : 'API key is missing');
 
 // Add route for a simple health check
 app.get('/api/health', (req, res) => {
@@ -93,6 +98,12 @@ app.post('/api/chat', async (req, res) => {
       return res.status(400).json({ error: 'Session ID is required' });
     }
     
+    // Validate API key before making the request
+    if (!QWEN_API_KEY || !QWEN_API_KEY.startsWith('sk-or-v1-')) {
+      console.error('Invalid or missing Qwen API key');
+      throw new Error('Invalid or missing API key configuration');
+    }
+    
     // Initialize conversation if it doesn't exist
     if (!conversations[sessionId]) {
       conversations[sessionId] = [
@@ -103,8 +114,7 @@ app.post('/api/chat', async (req, res) => {
     // Add user message to conversation
     conversations[sessionId].push({ role: 'user', content: message });
     
-    console.log('Using Qwen API Key:', QWEN_API_KEY ? 'Present' : 'Missing');
-    console.log('Conversation history:', conversations[sessionId]);
+    console.log('Using Qwen API Key:', `${QWEN_API_KEY.substring(0, 10)}...`);
     
     try {
       console.log('Attempting to call Qwen API...');
