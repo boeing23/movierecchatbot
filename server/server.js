@@ -27,12 +27,12 @@ app.get('/', (req, res) => {
 
 // Qwen API configuration
 const QWEN_API_KEY = process.env.QWEN_API_KEY;
-// Correct API URL for Qwen via Alibaba Cloud DashScope
-const QWEN_API_URL = 'https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation';
+// Correct API URL for OpenRouter.ai
+const QWEN_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
 // Validate API key on startup
 if (!QWEN_API_KEY) {
-  console.error('Missing Qwen API key. Please add QWEN_API_KEY to your environment variables.');
+  console.error('Missing OpenRouter API key. Please add QWEN_API_KEY to your environment variables.');
 }
 
 console.log('Starting server with API key:', QWEN_API_KEY ? `${QWEN_API_KEY.substring(0, 10)}...` : 'API key is missing');
@@ -43,26 +43,21 @@ app.get('/api/debug', async (req, res) => {
     console.log('=== DEBUG API KEY INFO ===');
     console.log('API Key exists:', !!QWEN_API_KEY);
     console.log('API Key length:', QWEN_API_KEY ? QWEN_API_KEY.length : 0);
-    console.log('API Key prefix:', QWEN_API_KEY ? QWEN_API_KEY.substring(0, 5) : 'N/A');
-    console.log('API Key format valid:', QWEN_API_KEY && QWEN_API_KEY.startsWith('sk-'));
+    console.log('API Key prefix:', QWEN_API_KEY ? QWEN_API_KEY.substring(0, 10) : 'N/A');
+    console.log('API Key format valid:', QWEN_API_KEY && (QWEN_API_KEY.startsWith('sk-') || QWEN_API_KEY.startsWith('sk-or-v1-')));
     
-    const authHeader = `Bearer ${QWEN_API_KEY}`;
-    console.log('Auth header:', authHeader.substring(0, 20) + '...');
+    // Remove the Bearer prefix
+    console.log('Auth header (without Bearer):', QWEN_API_KEY ? QWEN_API_KEY.substring(0, 15) + '...' : 'N/A');
     
     // Debug payload
     const payload = {
-      model: 'qwen-max',
-      input: {
-        messages: [
-          { role: 'system', content: 'You are a helpful assistant.' },
-          { role: 'user', content: 'Hello' }
-        ]
-      },
-      parameters: {
-        temperature: 0.7,
-        max_tokens: 10,
-        result_format: "message"
-      }
+      model: 'qwen/qwen2.5-coder-7b-instruct',
+      messages: [
+        { role: 'system', content: 'You are a helpful assistant.' },
+        { role: 'user', content: 'Hello' }
+      ],
+      temperature: 0.7,
+      max_tokens: 10
     };
     
     console.log('Request payload:', JSON.stringify(payload, null, 2));
@@ -77,7 +72,8 @@ app.get('/api/debug', async (req, res) => {
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': authHeader
+            'Authorization': `Bearer ${QWEN_API_KEY}`,
+            'HTTP-Referer': 'https://boeing23.github.io/movierecchatbot'
           }
         }
       );
@@ -93,13 +89,14 @@ app.get('/api/debug', async (req, res) => {
           exists: !!QWEN_API_KEY,
           length: QWEN_API_KEY ? QWEN_API_KEY.length : 0,
           prefix: QWEN_API_KEY ? QWEN_API_KEY.substring(0, 5) : 'N/A',
-          valid_format: QWEN_API_KEY && QWEN_API_KEY.startsWith('sk-')
+          valid_format: QWEN_API_KEY && (QWEN_API_KEY.startsWith('sk-') || QWEN_API_KEY.startsWith('sk-or-v1-'))
         },
         request: {
           url: QWEN_API_URL,
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + (QWEN_API_KEY ? QWEN_API_KEY.substring(0, 5) + '...' : 'N/A')
+            'Authorization': `Bearer ${QWEN_API_KEY}`,
+            'HTTP-Referer': 'https://boeing23.github.io/movierecchatbot'
           },
           payload: payload
         },
@@ -123,13 +120,14 @@ app.get('/api/debug', async (req, res) => {
           exists: !!QWEN_API_KEY,
           length: QWEN_API_KEY ? QWEN_API_KEY.length : 0,
           prefix: QWEN_API_KEY ? QWEN_API_KEY.substring(0, 5) : 'N/A',
-          valid_format: QWEN_API_KEY && QWEN_API_KEY.startsWith('sk-')
+          valid_format: QWEN_API_KEY && (QWEN_API_KEY.startsWith('sk-') || QWEN_API_KEY.startsWith('sk-or-v1-'))
         },
         request: {
           url: QWEN_API_URL,
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + (QWEN_API_KEY ? QWEN_API_KEY.substring(0, 5) + '...' : 'N/A')
+            'Authorization': `Bearer ${QWEN_API_KEY}`,
+            'HTTP-Referer': 'https://boeing23.github.io/movierecchatbot'
           },
           payload: payload
         },
@@ -165,23 +163,19 @@ app.get('/api/test', async (req, res) => {
     const testResponse = await axios.post(
       QWEN_API_URL,
       {
-        model: 'qwen-max',
-        input: {
-          messages: [
-            { role: 'system', content: 'You are a helpful assistant.' },
-            { role: 'user', content: 'Hello' }
-          ]
-        },
-        parameters: {
-          temperature: 0.7,
-          max_tokens: 10,
-          result_format: "message"
-        }
+        model: 'qwen/qwen2.5-coder-7b-instruct',
+        messages: [
+          { role: 'system', content: 'You are a helpful assistant.' },
+          { role: 'user', content: 'Hello' }
+        ],
+        temperature: 0.7,
+        max_tokens: 10
       },
       {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': authHeader
+          'Authorization': `Bearer ${QWEN_API_KEY}`,
+          'HTTP-Referer': 'https://boeing23.github.io/movierecchatbot'
         }
       }
     );
@@ -300,24 +294,20 @@ app.post('/api/chat', async (req, res) => {
     
     try {
       console.log('Attempting to call Qwen API...');
-      // Call Qwen API with correct format for DashScope API
+      // Call Qwen API with correct format for OpenRouter.ai
       const response = await axios.post(
         QWEN_API_URL,
         {
-          model: 'qwen-max',
-          input: {
-            messages: conversations[sessionId]
-          },
-          parameters: {
-            temperature: 0.7,
-            max_tokens: 800,
-            result_format: "message"
-          }
+          model: 'qwen/qwen2.5-coder-7b-instruct',
+          messages: conversations[sessionId],
+          temperature: 0.7,
+          max_tokens: 800
         },
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${QWEN_API_KEY}`
+            'Authorization': `Bearer ${QWEN_API_KEY}`,
+            'HTTP-Referer': 'https://boeing23.github.io/movierecchatbot'
           }
         }
       );
@@ -326,7 +316,7 @@ app.post('/api/chat', async (req, res) => {
       console.log('Qwen API response data:', JSON.stringify(response.data, null, 2));
       
       // Extract assistant's response
-      const assistantContent = response.data.output.text || response.data.output.message?.content;
+      const assistantContent = response.data.choices[0].message.content;
       if (!assistantContent) {
         console.error('No content in API response:', response.data);
         throw new Error('No content in API response');
