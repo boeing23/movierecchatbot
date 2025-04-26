@@ -10,6 +10,21 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
+// Root route
+app.get('/', (req, res) => {
+  res.json({
+    message: 'MovieGenius API',
+    version: '1.0.0',
+    endpoints: {
+      '/': 'API information (this endpoint)',
+      '/health': 'Health check endpoint',
+      '/api/health': 'API health status',
+      '/api/chat': 'POST - Send messages to the movie recommendation agent',
+      '/api/reset': 'POST - Reset conversation history'
+    }
+  });
+});
+
 // Qwen API configuration
 const QWEN_API_KEY = process.env.QWEN_API_KEY;
 // Correct API URL for Qwen via Alibaba Cloud DashScope
