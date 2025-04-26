@@ -135,7 +135,7 @@ app.post('/api/chat', async (req, res) => {
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${QWEN_API_KEY}`
+            'Authorization': QWEN_API_KEY
           }
         }
       );
