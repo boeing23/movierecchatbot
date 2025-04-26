@@ -25,9 +25,9 @@ app.get('/', (req, res) => {
   });
 });
 
-// Qwen API configuration
+// OpenRouter API configuration
 const QWEN_API_KEY = process.env.QWEN_API_KEY;
-// Correct API URL for OpenRouter.ai
+// Correct API URL for OpenRouter
 const QWEN_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
 // Validate API key on startup
@@ -44,26 +44,23 @@ app.get('/api/debug', async (req, res) => {
     console.log('API Key exists:', !!QWEN_API_KEY);
     console.log('API Key length:', QWEN_API_KEY ? QWEN_API_KEY.length : 0);
     console.log('API Key prefix:', QWEN_API_KEY ? QWEN_API_KEY.substring(0, 10) : 'N/A');
-    console.log('API Key format valid:', QWEN_API_KEY && (QWEN_API_KEY.startsWith('sk-') || QWEN_API_KEY.startsWith('sk-or-v1-')));
-    
-    // Remove the Bearer prefix
-    console.log('Auth header (without Bearer):', QWEN_API_KEY ? QWEN_API_KEY.substring(0, 15) + '...' : 'N/A');
+    console.log('API Key format valid:', QWEN_API_KEY && QWEN_API_KEY.startsWith('sk-or-'));
     
     // Debug payload
     const payload = {
-      model: 'qwen/qwen2.5-coder-7b-instruct',
+      model: 'openai/gpt-3.5-turbo',
       messages: [
         { role: 'system', content: 'You are a helpful assistant.' },
         { role: 'user', content: 'Hello' }
       ],
       temperature: 0.7,
-      max_tokens: 10
+      max_tokens: 800
     };
     
     console.log('Request payload:', JSON.stringify(payload, null, 2));
     console.log('API URL:', QWEN_API_URL);
     
-    console.log('Sending test request to Qwen API...');
+    console.log('Sending test request to OpenRouter API...');
     
     try {
       const response = await axios.post(
@@ -89,14 +86,14 @@ app.get('/api/debug', async (req, res) => {
         api_key_info: {
           exists: !!QWEN_API_KEY,
           length: QWEN_API_KEY ? QWEN_API_KEY.length : 0,
-          prefix: QWEN_API_KEY ? QWEN_API_KEY.substring(0, 5) : 'N/A',
-          valid_format: QWEN_API_KEY && (QWEN_API_KEY.startsWith('sk-') || QWEN_API_KEY.startsWith('sk-or-v1-'))
+          prefix: QWEN_API_KEY ? QWEN_API_KEY.substring(0, 10) : 'N/A',
+          valid_format: QWEN_API_KEY && QWEN_API_KEY.startsWith('sk-or-')
         },
         request: {
           url: QWEN_API_URL,
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${QWEN_API_KEY}`,
+            'Authorization': `Bearer ${QWEN_API_KEY.substring(0, 10)}...`,
             'HTTP-Referer': 'https://boeing23.github.io/movierecchatbot',
             'X-Title': 'MovieGenius'
           },
@@ -121,14 +118,14 @@ app.get('/api/debug', async (req, res) => {
         api_key_info: {
           exists: !!QWEN_API_KEY,
           length: QWEN_API_KEY ? QWEN_API_KEY.length : 0,
-          prefix: QWEN_API_KEY ? QWEN_API_KEY.substring(0, 5) : 'N/A',
-          valid_format: QWEN_API_KEY && (QWEN_API_KEY.startsWith('sk-') || QWEN_API_KEY.startsWith('sk-or-v1-'))
+          prefix: QWEN_API_KEY ? QWEN_API_KEY.substring(0, 10) : 'N/A',
+          valid_format: QWEN_API_KEY && QWEN_API_KEY.startsWith('sk-or-')
         },
         request: {
           url: QWEN_API_URL,
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${QWEN_API_KEY}`,
+            'Authorization': `Bearer ${QWEN_API_KEY.substring(0, 10)}...`,
             'HTTP-Referer': 'https://boeing23.github.io/movierecchatbot',
             'X-Title': 'MovieGenius'
           },
@@ -166,20 +163,23 @@ app.get('/api/test', async (req, res) => {
     const testResponse = await axios.post(
       QWEN_API_URL,
       {
-        model: 'qwen/qwen2.5-coder-7b-instruct',
-        messages: [
-          { role: 'system', content: 'You are a helpful assistant.' },
-          { role: 'user', content: 'Hello' }
-        ],
-        temperature: 0.7,
-        max_tokens: 10
+        model: 'qwen-max',
+        input: {
+          messages: [
+            { role: 'system', content: 'You are a helpful assistant.' },
+            { role: 'user', content: 'Hello' }
+          ]
+        },
+        parameters: {
+          temperature: 0.7,
+          max_tokens: 10,
+          result_format: "message"
+        }
       },
       {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${QWEN_API_KEY}`,
-          'HTTP-Referer': 'https://boeing23.github.io/movierecchatbot',
-          'X-Title': 'MovieGenius'
+          'Authorization': QWEN_API_KEY
         }
       }
     );
@@ -279,7 +279,7 @@ app.post('/api/chat', async (req, res) => {
     
     // Validate API key before making the request
     if (!QWEN_API_KEY) {
-      console.error('Missing Qwen API key');
+      console.error('Missing OpenRouter API key');
       throw new Error('Missing API key configuration');
     }
     
@@ -293,16 +293,15 @@ app.post('/api/chat', async (req, res) => {
     // Add user message to conversation
     conversations[sessionId].push({ role: 'user', content: message });
     
-    console.log('Using Qwen API Key:', `${QWEN_API_KEY.substring(0, 10)}...`);
+    console.log('Using OpenRouter API Key:', `${QWEN_API_KEY.substring(0, 10)}...`);
     console.log('Sending conversation:', JSON.stringify(conversations[sessionId], null, 2));
     
     try {
-      console.log('Attempting to call Qwen API...');
-      // Call Qwen API with correct format for OpenRouter.ai
+      console.log('Attempting to call OpenRouter API...');
       const response = await axios.post(
         QWEN_API_URL,
         {
-          model: 'qwen/qwen2.5-coder-7b-instruct',
+          model: 'openai/gpt-3.5-turbo', // Using a more reliable model
           messages: conversations[sessionId],
           temperature: 0.7,
           max_tokens: 800
@@ -317,10 +316,10 @@ app.post('/api/chat', async (req, res) => {
         }
       );
       
-      console.log('Qwen API response status:', response.status);
-      console.log('Qwen API response data:', JSON.stringify(response.data, null, 2));
+      console.log('OpenRouter API response status:', response.status);
+      console.log('OpenRouter API response data:', JSON.stringify(response.data, null, 2));
       
-      // Extract assistant's response
+      // Extract assistant's response using OpenRouter's response format
       const assistantContent = response.data.choices[0].message.content;
       if (!assistantContent) {
         console.error('No content in API response:', response.data);
