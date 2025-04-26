@@ -103,9 +103,11 @@ app.post('/api/chat', async (req, res) => {
     // Add user message to conversation
     conversations[sessionId].push({ role: 'user', content: message });
     
-    console.log('Sending request to Qwen API with messages:', conversations[sessionId]);
+    console.log('Using Qwen API Key:', QWEN_API_KEY ? 'Present' : 'Missing');
+    console.log('Conversation history:', conversations[sessionId]);
     
     try {
+      console.log('Attempting to call Qwen API...');
       // Call Qwen API with correct format for DashScope API
       const response = await axios.post(
         QWEN_API_URL,
@@ -127,46 +129,55 @@ app.post('/api/chat', async (req, res) => {
         }
       );
       
-      console.log('Received response from Qwen API:', response.data);
+      console.log('Qwen API response status:', response.status);
+      console.log('Qwen API response data:', JSON.stringify(response.data, null, 2));
       
-      // Extract assistant's response - DashScope API has a different response format
+      // Extract assistant's response
       const assistantContent = response.data.output.text || response.data.output.message?.content;
-      const assistantMessage = { role: 'assistant', content: assistantContent };
+      if (!assistantContent) {
+        console.error('No content in API response:', response.data);
+        throw new Error('No content in API response');
+      }
       
-      // Add assistant message to conversation history
+      const assistantMessage = { role: 'assistant', content: assistantContent };
       conversations[sessionId].push(assistantMessage);
       
-      // Return assistant's response
       res.json({ 
         response: assistantMessage.content,
         sessionId: sessionId
       });
     } catch (apiError) {
-      console.error('API Error:', apiError);
-      console.error('Falling back to local response generation');
+      console.error('API Error Details:', {
+        message: apiError.message,
+        status: apiError.response?.status,
+        statusText: apiError.response?.statusText,
+        data: apiError.response?.data,
+        headers: apiError.response?.headers
+      });
       
       // Use fallback response generation
       const fallbackContent = getFallbackResponse(message);
       const fallbackMessage = { role: 'assistant', content: fallbackContent };
-      
-      // Add fallback message to conversation history
       conversations[sessionId].push(fallbackMessage);
       
-      // Return fallback response
       res.json({
         response: fallbackContent,
         sessionId: sessionId,
-        fallback: true
+        fallback: true,
+        error: apiError.message
       });
     }
   } catch (error) {
-    console.error('Error in request handling:', error);
-    console.error('Error details:', error.response?.data || error.message);
-    console.error('Error stack:', error.stack);
+    console.error('Request handling error:', {
+      message: error.message,
+      stack: error.stack,
+      response: error.response?.data
+    });
     
     res.status(500).json({ 
       error: 'Failed to handle the request',
-      details: error.response?.data || error.message
+      details: error.message,
+      fallback: true
     });
   }
 });
