@@ -163,23 +163,20 @@ app.get('/api/test', async (req, res) => {
     const testResponse = await axios.post(
       QWEN_API_URL,
       {
-        model: 'qwen-max',
-        input: {
-          messages: [
-            { role: 'system', content: 'You are a helpful assistant.' },
-            { role: 'user', content: 'Hello' }
-          ]
-        },
-        parameters: {
-          temperature: 0.7,
-          max_tokens: 10,
-          result_format: "message"
-        }
+        model: 'openai/gpt-3.5-turbo',
+        messages: [
+          { role: 'system', content: 'You are a helpful assistant.' },
+          { role: 'user', content: 'Hello' }
+        ],
+        temperature: 0.7,
+        max_tokens: 800
       },
       {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': QWEN_API_KEY
+          'Authorization': `Bearer ${QWEN_API_KEY}`,
+          'HTTP-Referer': 'https://boeing23.github.io/movierecchatbot',
+          'X-Title': 'MovieGenius'
         }
       }
     );
