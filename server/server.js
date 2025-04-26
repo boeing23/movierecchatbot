@@ -264,6 +264,44 @@ function getFallbackResponse(message) {
   }
 }
 
+// Format assistant responses for better readability
+function formatAssistantResponse(content) {
+  // First, trim any extra whitespace
+  let formatted = content.trim();
+
+  // Replace numbered movie suggestions with emoji
+  formatted = formatted.replace(/(\d+\.\s+\*\*)/g, '🎬 **');
+
+  // Add emoji to common sections
+  const emojiReplacements = [
+    { pattern: /Director:/g, replacement: '🎥 Director:' },
+    { pattern: /Cast:/g, replacement: '👥 Cast:' },
+    { pattern: /Why you'll enjoy it:/g, replacement: '✨ Why you\'ll enjoy it:' },
+    { pattern: /Would you like/g, replacement: '🤔 Would you like' },
+    { pattern: /Do you have any/g, replacement: '💭 Do you have any' },
+    { pattern: /Based on your/g, replacement: '🎯 Based on your' }
+  ];
+
+  // Apply all emoji replacements
+  emojiReplacements.forEach(({ pattern, replacement }) => {
+    formatted = formatted.replace(pattern, replacement);
+  });
+  
+  // Split into paragraphs and clean up
+  formatted = formatted
+    .split('\n')
+    .filter(line => line.trim() !== '')
+    .map(line => line.trim())
+    .join('\n\n');
+
+  // Add a friendly emoji at the start if it's a greeting
+  if (formatted.toLowerCase().includes('hello') || formatted.toLowerCase().includes('hi')) {
+    formatted = '👋 ' + formatted;
+  }
+
+  return formatted;
+}
+
 // Route to start or continue a conversation
 app.post('/api/chat', async (req, res) => {
   try {
@@ -316,18 +354,19 @@ app.post('/api/chat', async (req, res) => {
       console.log('OpenRouter API response status:', response.status);
       console.log('OpenRouter API response data:', JSON.stringify(response.data, null, 2));
       
-      // Extract assistant's response using OpenRouter's response format
+      // Extract and format assistant's response
       const assistantContent = response.data.choices[0].message.content;
       if (!assistantContent) {
         console.error('No content in API response:', response.data);
         throw new Error('No content in API response');
       }
       
-      const assistantMessage = { role: 'assistant', content: assistantContent };
+      const formattedContent = formatAssistantResponse(assistantContent);
+      const assistantMessage = { role: 'assistant', content: formattedContent };
       conversations[sessionId].push(assistantMessage);
       
       res.json({ 
-        response: assistantMessage.content,
+        response: formattedContent,
         sessionId: sessionId
       });
     } catch (apiError) {
@@ -339,8 +378,8 @@ app.post('/api/chat', async (req, res) => {
         headers: apiError.response?.headers
       });
       
-      // Use fallback response generation
-      const fallbackContent = getFallbackResponse(message);
+      // Use fallback response generation with formatting
+      const fallbackContent = formatAssistantResponse(getFallbackResponse(message));
       const fallbackMessage = { role: 'assistant', content: fallbackContent };
       conversations[sessionId].push(fallbackMessage);
       
