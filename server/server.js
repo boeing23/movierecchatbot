@@ -266,60 +266,46 @@ function getFallbackResponse(message) {
 
 // Format assistant responses for better readability
 function formatAssistantResponse(content) {
-  // First, trim any extra whitespace
   let formatted = content.trim();
 
-  // Fix movie titles formatting
-  // Replace numbered movie suggestions with emoji
-  formatted = formatted.replace(/(\d+\.\s+)\*\*(.+?)\*\*\s*\((\d{4})\)/g, '🎬 **$2** ($3)');
-  
-  // Add line breaks and emoji to common sections
-  const sections = [
-    { pattern: /Director:/g, replacement: '\n🎥 Director:' },
-    { pattern: /Cast:/g, replacement: '\n👥 Cast:' },
-    { pattern: /Why you'll enjoy it:/g, replacement: '\n✨ Why you\'ll enjoy it:' }
-  ];
+  // Replace numbered movie titles with 🎬 emoji and ensure bold formatting
+  formatted = formatted.replace(/(\d+\.\s+\*\*)(.+?)(\*\*\s*\()(\d{4})(\))/g, '🎬 **$2** ($4)');
 
-  // Apply section formatting
+  // Add emojis and line breaks before known sections
+  const sections = [
+    { pattern: /Director:/gi, replacement: '\n🎥 **Director:**' },
+    { pattern: /Cast:/gi, replacement: '\n👥 **Cast:**' },
+    { pattern: /Brief Explanation:/gi, replacement: '\n✨ **Brief Explanation:**' }
+  ];
   sections.forEach(({ pattern, replacement }) => {
     formatted = formatted.replace(pattern, replacement);
   });
-  
-  // Fix question/conclusion formatting with proper spacing
+
+  // Add line breaks for conclusions
   const conclusions = [
-    { pattern: /Would you like/g, replacement: '\n\n🤔 Would you like' },
-    { pattern: /Do you have any/g, replacement: '\n\n💭 Do you have any' },
-    { pattern: /Based on your/g, replacement: '\n\n🎯 Based on your' }
+    { pattern: /Would you like/gi, replacement: '\n\n🤔 Would you like' },
+    { pattern: /Do you have any/gi, replacement: '\n\n💭 Do you have any' },
+    { pattern: /Based on your/gi, replacement: '\n\n🎯 Based on your' }
   ];
-  
   conclusions.forEach(({ pattern, replacement }) => {
     formatted = formatted.replace(pattern, replacement);
   });
 
-  // Split by movie entries (starting with 🎬)
-  let parts = formatted.split('🎬');
-  
-  // Process introduction (first part)
+  // Greet if it's a hello
+  let parts = formatted.split(/(?=🎬)/g); // Better split on 🎬 without losing it
   let introduction = parts[0].trim();
   
-  // Add greeting emoji if needed
   if (introduction.toLowerCase().includes('hello') || introduction.toLowerCase().includes('hi')) {
     introduction = '👋 ' + introduction;
   }
-  
-  // Process movie recommendations
-  let movies = parts.slice(1).map(movie => {
-    // Add the 🎬 back that was removed during split
-    return '🎬 ' + movie.trim();
-  });
-  
-  // Reconstruct the message with proper spacing
-  formatted = [introduction, ...movies].filter(part => part.trim() !== '').join('\n\n');
-  
-  // Clean up any double asterisks that got separated
-  formatted = formatted.replace(/\*\*\s+-\s+\*\*/g, '');
-  
-  // Clean up any multiple consecutive line breaks
+
+  // Rebuild final message
+  formatted = [introduction, ...parts.slice(1).map(m => m.trim())]
+    .filter(Boolean)
+    .join('\n\n');
+
+  // Final cleanup
+  formatted = formatted.replace(/\*\*\s*-\s*\*\*/g, '');
   formatted = formatted.replace(/\n{3,}/g, '\n\n').trim();
 
   return formatted;
